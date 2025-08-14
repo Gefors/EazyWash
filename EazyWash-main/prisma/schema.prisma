@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model bookingschema {
+  bok_id       Int      @id @default(autoincrement())
+  start_time   DateTime @db.Time(6)
+  end_time     DateTime @db.Time(6)
+  per_id       Int
+  booking_date DateTime @db.Date
+  person       person   @relation(fields: [per_id], references: [per_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model organization {
+  org_id  Int      @id @default(autoincrement())
+  name    String   @db.VarChar(60)
+  address String?  @db.VarChar(100)
+  email   String   @db.VarChar(50)
+  person  person[]
+}
+
+model person {
+  per_id                                       Int              @id @default(autoincrement())
+  username                                     String           @db.VarChar(50)
+  password                                     String           @db.VarChar(30)
+  org_id                                       Int?
+  authentication_authentication_personToperson authentication[] @relation("authentication_personToperson")
+  bookingschema                                bookingschema[]
+  organization                                 organization?    @relation(fields: [org_id], references: [org_id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model testtableperson {
+  person_id       Int               @id @default(autoincrement())
+  f_name          String?           @db.VarChar(20)
+  l_name          String?           @db.VarChar(30)
+  testtableschema testtableschema[]
+}
+
+model testtableschema {
+  schema_id       Int              @id @default(autoincrement())
+  person_id       Int?
+  day             String           @db.VarChar(15)
+  time            String           @db.Char(5)
+  booked          Boolean
+  testtableperson testtableperson? @relation(fields: [person_id], references: [person_id], onDelete: NoAction)
+}
+
+model authentication {
+  person                               Int      @default(autoincrement())
+  username                             String   @db.VarChar(50)
+  token                                String   @id @db.VarChar(36)
+  expires                              DateTime @db.Timestamp(6)
+  person_authentication_personToperson person   @relation("authentication_personToperson", fields: [person], references: [per_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([token, expires])
+}
